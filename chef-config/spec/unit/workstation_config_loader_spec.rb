@@ -500,22 +500,18 @@ RSpec.describe ChefConfig::WorkstationConfigLoader do
 
       context "and has a profile containing a full key" do
         let(:content) do
+          generated_key = OpenSSL::PKey::RSA.new(2048).to_pem.lines[0, 2].join
           content = <<~EOH
             [default]
             client_key = """
-            -----BEGIN RSA PRIVATE KEY-----
-            foo
-            """
+            #{generated_key}            """
           EOH
           content
         end
 
         it "applies the expected config" do
           expect { config_loader.load_credentials }.not_to raise_error
-          expect(ChefConfig::Config.client_key_contents).to eq(<<~EOH
-            -----BEGIN RSA PRIVATE KEY-----
-            foo
-          EOH
+          expect(ChefConfig::Config.client_key_contents).to eq(generated_key)
                                                               )
         end
       end
